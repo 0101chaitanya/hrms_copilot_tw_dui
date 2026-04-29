@@ -18,7 +18,7 @@
     "jsonwebtoken": "^9.0.2",
     "@casl/mongoose": "^8.0.5",
     "@casl/ability": "^6.8.0",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.1.1",
     "mongodb": "^6.12.0",
     "dayjs": "^1.11.13",
     "cors": "^2.8.5"
