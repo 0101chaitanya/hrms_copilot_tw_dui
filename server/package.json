@@ -16,8 +16,6 @@
     "zod": "^3.24.1",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
-    "@casl/mongoose": "^8.0.5",
-    "@casl/ability": "^6.8.0",
     "multer": "^2.1.1",
     "mongodb": "^6.12.0",
     "dayjs": "^1.11.13",
