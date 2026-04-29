@@ -120,8 +120,8 @@ const EmployeesPage = () => {
             </h3>
             <EmployeeForm employee={selectedEmployee} onClose={handleFormClose} />
           </div>
-          <form method="dialog" className="modal-backdrop" onClick={() => setOpened(false)}>
-            <button>close</button>
+          <form method="dialog" className="modal-backdrop" onClick={(e) => { e.preventDefault(); setOpened(false); }}>
+            <button type="button">close</button>
           </form>
         </dialog>
       </div>

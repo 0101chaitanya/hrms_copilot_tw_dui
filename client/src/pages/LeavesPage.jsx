@@ -136,8 +136,8 @@ const LeavesPage = () => {
             <h3 className="font-bold text-lg mb-4">Request Leave</h3>
             <LeaveForm onClose={handleFormClose} />
           </div>
-          <form method="dialog" className="modal-backdrop" onClick={() => setOpened(false)}>
-            <button>close</button>
+          <form method="dialog" className="modal-backdrop" onClick={(e) => { e.preventDefault(); setOpened(false); }}>
+            <button type="button">close</button>
           </form>
         </dialog>
       </div>

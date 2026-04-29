@@ -22,7 +22,7 @@ await connectDB();
 // Middleware
 app.use(cors({
 
-    origin: "http://localhost:5173",
+    origin: process.env.FRONT_END_URL,
     credentials: true
 
 }));
@@ -53,7 +53,7 @@ app.use((req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT ;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

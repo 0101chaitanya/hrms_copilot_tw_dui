@@ -5,7 +5,7 @@ import { seedUsers } from './users.js';
 
 dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/hrms_copilot';
+const MONGODB_URI = process.env.MONGODB_URI ;
 
 async function main() {
   try {
