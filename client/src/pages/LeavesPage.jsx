@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { AppLayout } from '../layouts/AppShell';
+import { Page } from '../components/Page';
 import api from '../utils/api';
 import { useAuth } from '../hooks/useAuth';
 import LeaveForm from '../components/LeaveForm';
 import clsx from 'clsx';
+import Loader from '../components/Loader';
 
 const LeavesPage = () => {
   const [leaves, setLeaves] = useState([]);
@@ -63,24 +65,21 @@ const LeavesPage = () => {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex justify-center items-center h-64">
-          <span className="loading loading-spinner loading-lg text-primary"></span>
-        </div>
+        <Loader />
       </AppLayout>
     );
   }
 
+  const pageActions = (
+    <button className="btn btn-primary" onClick={() => setOpened(true)}>
+      Request Leave
+    </button>
+  );
+
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Leave Management</h1>
-          <button className="btn btn-primary" onClick={() => setOpened(true)}>
-            Request Leave
-          </button>
-        </div>
-
-        <div className="overflow-x-auto bg-base-100 rounded-lg shadow">
+      <Page title="Leave Management" actions={pageActions}>
+        <div className="overflow-x-auto bg-base-100 rounded-lg shadow border border-base-300">
           <table className="table table-zebra w-full">
             <thead>
               <tr className="bg-base-200">
@@ -94,44 +93,53 @@ const LeavesPage = () => {
               </tr>
             </thead>
             <tbody>
-              {leaves.map((leave) => (
-                <tr key={leave._id}>
-                  <td>{leave.employeeId?.name}</td>
-                  <td>{new Date(leave.startDate).toLocaleDateString()}</td>
-                  <td>{new Date(leave.endDate).toLocaleDateString()}</td>
-                  <td className="capitalize">{leave.leaveType}</td>
-                  <td className="max-w-xs truncate">{leave.reason}</td>
-                  <td>
-                    <span className={clsx('badge', getStatusBadgeClass(leave.status))}>
-                      {leave.status}
-                    </span>
+              {leaves.length === 0 ? (
+                <tr>
+                  <td colSpan={(isAdmin || isHR) ? "7" : "6"} className="text-center py-4 text-base-content/50">
+                    No leave requests found.
                   </td>
-                  {(isAdmin || isHR) && leave.status === 'pending' && (
-                    <td>
-                      <div className="flex gap-2">
-                        <button
-                          className="btn btn-sm btn-success"
-                          onClick={() => handleApprove(leave._id)}
-                        >
-                          Approve
-                        </button>
-                        <button
-                          className="btn btn-sm btn-error btn-outline"
-                          onClick={() => handleReject(leave._id)}
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </td>
-                  )}
                 </tr>
-              ))}
+              ) : (
+                leaves.map((leave) => (
+                  <tr key={leave._id}>
+                    <td>{leave.employeeId?.name || 'Unknown'}</td>
+                    <td>{new Date(leave.startDate).toLocaleDateString()}</td>
+                    <td>{new Date(leave.endDate).toLocaleDateString()}</td>
+                    <td className="capitalize">{leave.leaveType}</td>
+                    <td className="max-w-xs truncate" title={leave.reason}>{leave.reason}</td>
+                    <td>
+                      <span className={clsx('badge badge-sm', getStatusBadgeClass(leave.status))}>
+                        {leave.status}
+                      </span>
+                    </td>
+                    {(isAdmin || isHR) && (
+                      <td>
+                        {leave.status === 'pending' && (
+                          <div className="flex gap-2">
+                            <button
+                              className="btn btn-xs btn-success"
+                              onClick={() => handleApprove(leave._id)}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              className="btn btn-xs btn-error btn-outline"
+                              onClick={() => handleReject(leave._id)}
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
 
-        {/* DaisyUI Modal */}
-        <dialog className={`modal ${opened ? 'modal-open' : ''}`}>
+        <dialog className={clsx('modal', opened && 'modal-open')}>
           <div className="modal-box max-w-2xl">
             <h3 className="font-bold text-lg mb-4">Request Leave</h3>
             <LeaveForm onClose={handleFormClose} />
@@ -140,7 +148,7 @@ const LeavesPage = () => {
             <button type="button">close</button>
           </form>
         </dialog>
-      </div>
+      </Page>
     </AppLayout>
   );
 };

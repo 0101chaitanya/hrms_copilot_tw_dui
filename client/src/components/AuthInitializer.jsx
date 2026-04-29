@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { initAuth } from '../slices/authSlice';
+import Loader from './Loader';
 
 export const AuthInitializer = ({ children }) => {
   const dispatch = useDispatch();
@@ -17,7 +18,7 @@ export const AuthInitializer = ({ children }) => {
   if (loading && !initialized) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
+        <Loader />
       </div>
     );
   }

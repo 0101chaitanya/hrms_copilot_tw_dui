@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { AppLayout } from '../layouts/AppShell';
+import { Page } from '../components/Page';
 import api from '../utils/api';
 import { useAuth } from '../hooks/useAuth';
+import Loader from '../components/Loader';
+import MetricCard from '../components/MetricCard';
+import { MdAttachMoney, MdAccountBalanceWallet, MdMoneyOff, MdPeople } from 'react-icons/md';
 
 const MONTHS = [
   { value: 1, label: 'January' },
@@ -90,27 +94,22 @@ const PayrollPage = () => {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex justify-center items-center h-64">
-          <span className="loading loading-spinner loading-lg text-primary"></span>
-        </div>
+        <Loader />
       </AppLayout>
     );
   }
 
+  const pageActions = isAdmin && (
+    <button className="btn btn-primary" onClick={handleGeneratePayroll}>
+      Generate Payroll
+    </button>
+  );
+
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Payroll Management</h1>
-          {isAdmin && (
-            <button className="btn btn-primary" onClick={handleGeneratePayroll}>
-              Generate Payroll
-            </button>
-          )}
-        </div>
-
-        <div className="flex gap-4 mb-6">
-          <div className="form-control w-48">
+      <Page title="Payroll Management" actions={pageActions}>
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="form-control w-full sm:w-48">
             <label className="label">
               <span className="label-text">Month</span>
             </label>
@@ -124,7 +123,7 @@ const PayrollPage = () => {
               ))}
             </select>
           </div>
-          <div className="form-control w-48">
+          <div className="form-control w-full sm:w-48">
             <label className="label">
               <span className="label-text">Year</span>
             </label>
@@ -141,35 +140,35 @@ const PayrollPage = () => {
         </div>
 
         {summary && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="card bg-base-100 shadow border border-base-300">
-              <div className="card-body p-4">
-                <p className="text-sm text-base-content/60">Total Gross Pay</p>
-                <p className="text-2xl font-bold">${summary.totalGrossPay?.toLocaleString()}</p>
-              </div>
-            </div>
-            <div className="card bg-base-100 shadow border border-base-300">
-              <div className="card-body p-4">
-                <p className="text-sm text-base-content/60">Total Deductions</p>
-                <p className="text-2xl font-bold">${summary.totalDeductions?.toLocaleString()}</p>
-              </div>
-            </div>
-            <div className="card bg-base-100 shadow border border-base-300">
-              <div className="card-body p-4">
-                <p className="text-sm text-base-content/60">Total Net Pay</p>
-                <p className="text-2xl font-bold">${summary.totalNetPay?.toLocaleString()}</p>
-              </div>
-            </div>
-            <div className="card bg-base-100 shadow border border-base-300">
-              <div className="card-body p-4">
-                <p className="text-sm text-base-content/60">Records Count</p>
-                <p className="text-2xl font-bold">{summary.recordsCount}</p>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <MetricCard
+              title="Total Gross Pay"
+              value={`$${summary.totalGrossPay?.toLocaleString() || 0}`}
+              icon={MdAttachMoney}
+              iconBgColor="bg-primary/10 text-primary"
+            />
+            <MetricCard
+              title="Total Deductions"
+              value={`$${summary.totalDeductions?.toLocaleString() || 0}`}
+              icon={MdMoneyOff}
+              iconBgColor="bg-error/10 text-error"
+            />
+            <MetricCard
+              title="Total Net Pay"
+              value={`$${summary.totalNetPay?.toLocaleString() || 0}`}
+              icon={MdAccountBalanceWallet}
+              iconBgColor="bg-success/10 text-success"
+            />
+            <MetricCard
+              title="Records Count"
+              value={summary.recordsCount || 0}
+              icon={MdPeople}
+              iconBgColor="bg-info/10 text-info"
+            />
           </div>
         )}
 
-        <div className="overflow-x-auto bg-base-100 rounded-lg shadow">
+        <div className="overflow-x-auto bg-base-100 rounded-lg shadow border border-base-300">
           <table className="table table-zebra w-full">
             <thead>
               <tr className="bg-base-200">
@@ -185,29 +184,37 @@ const PayrollPage = () => {
               </tr>
             </thead>
             <tbody>
-              {payroll.map((record) => (
-                <tr key={record._id}>
-                  <td>{record.employeeId?.name}</td>
-                  <td>${record.basicPay?.toLocaleString()}</td>
-                  <td>${record.allowances?.toLocaleString()}</td>
-                  <td>${record.grossPay?.toLocaleString()}</td>
-                  <td>${record.totalDeductions?.toLocaleString()}</td>
-                  <td>${record.tax?.toLocaleString()}</td>
-                  <td className="font-bold">${record.netPay?.toLocaleString()}</td>
-                  <td>
-                    <span className="badge badge-ghost">{record.status}</span>
-                  </td>
-                  <td>
-                    <button className="btn btn-sm btn-ghost" onClick={() => handlePrint(record)}>
-                      Print
-                    </button>
+              {payroll.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="text-center py-4 text-base-content/50">
+                    No payroll records found for this period.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                payroll.map((record) => (
+                  <tr key={record._id}>
+                    <td>{record.employeeId?.name || 'Unknown'}</td>
+                    <td>${record.basicPay?.toLocaleString() || 0}</td>
+                    <td>${record.allowances?.toLocaleString() || 0}</td>
+                    <td>${record.grossPay?.toLocaleString() || 0}</td>
+                    <td>${record.totalDeductions?.toLocaleString() || 0}</td>
+                    <td>${record.tax?.toLocaleString() || 0}</td>
+                    <td className="font-bold text-success">${record.netPay?.toLocaleString() || 0}</td>
+                    <td>
+                      <span className="badge badge-ghost badge-sm">{record.status}</span>
+                    </td>
+                    <td>
+                      <button className="btn btn-xs btn-ghost" onClick={() => handlePrint(record)}>
+                        Print
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
-      </div>
+      </Page>
     </AppLayout>
   );
 };

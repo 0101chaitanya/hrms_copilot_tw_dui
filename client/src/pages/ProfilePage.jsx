@@ -3,12 +3,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AppLayout } from '../layouts/AppShell';
+import { Page } from '../components/Page';
 import { useAuth } from '../hooks/useAuth';
 import api from '../utils/api';
 import { MdPerson, MdEmail, MdPhone, MdBusiness, MdBadge, MdCheck } from 'react-icons/md';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../slices/authSlice';
 import clsx from 'clsx';
+import InputField from '../components/InputField'; // Import the shared InputField
 
 const profileSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -75,40 +77,9 @@ const ProfilePage = () => {
     return 'bg-info/10 text-info';
   };
 
-  const InputField = ({ label, name, type = 'text', icon: Icon, error, disabled, description, ...props }) => (
-    <div className="form-control w-full">
-      <label className="label">
-        <span className="label-text">{label}</span>
-      </label>
-      <div className="relative">
-        {Icon && (
-          <span className={clsx('absolute left-3 top-3', disabled ? 'text-base-content/30' : 'text-base-content/50')}>
-            <Icon size={18} />
-          </span>
-        )}
-        <input
-          type={type}
-          disabled={disabled}
-          className={clsx(
-            'input input-bordered w-full',
-            Icon && 'pl-10',
-            error && 'input-error',
-            disabled && 'input-disabled bg-base-200'
-          )}
-          {...register(name)}
-          {...props}
-        />
-      </div>
-      {error && <span className="text-error text-sm mt-1">{error.message}</span>}
-      {description && <span className="text-xs text-base-content/50 mt-1">{description}</span>}
-    </div>
-  );
-
   return (
     <AppLayout>
-      <div className="max-w-6xl mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6">My Profile</h1>
-
+      <Page title="My Profile">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Profile Info Card */}
           <div className="md:col-span-1">
@@ -164,51 +135,51 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <InputField
                       label="First Name"
-                      name="firstName"
                       icon={MdPerson}
                       error={errors.firstName}
+                      {...register('firstName')}
                     />
                     <InputField
                       label="Last Name"
-                      name="lastName"
                       icon={MdPerson}
                       error={errors.lastName}
+                      {...register('lastName')}
                     />
                   </div>
 
                   <InputField
                     label="Phone"
-                    name="phone"
                     type="tel"
                     icon={MdPhone}
                     error={errors.phone}
+                    {...register('phone')}
                   />
 
                   {/* Only Admin/HR can edit department */}
                   {(isAdmin || isHR) ? (
                     <InputField
                       label="Department"
-                      name="department"
                       icon={MdBusiness}
                       error={errors.department}
                       description="Only Admin and HR can edit department"
+                      {...register('department')}
                     />
                   ) : (
                     <InputField
                       label="Department"
-                      name="departmentDisabled"
                       icon={MdBusiness}
                       disabled
                       description="Contact HR to change your department"
+                      value={user?.department || ''} // Display current department for disabled field
                     />
                   )}
 
                   <InputField
                     label="Email"
-                    name="emailDisabled"
                     icon={MdEmail}
                     disabled
                     description="Email cannot be changed"
+                    value={user?.email || ''} // Display current email for disabled field
                   />
 
                   <div className="flex justify-end">
@@ -245,7 +216,7 @@ const ProfilePage = () => {
             </div>
           </div>
         </div>
-      </div>
+      </Page>
     </AppLayout>
   );
 };

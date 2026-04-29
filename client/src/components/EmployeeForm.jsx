@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import api from '../utils/api';
 import { MdPerson, MdEmail, MdPhone, MdLocationOn, MdCalendarToday, MdWork, MdAttachMoney, MdBusiness } from 'react-icons/md';
+import InputField from './InputField'; // Import the shared InputField
 
 const employeeSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -50,104 +51,82 @@ const EmployeeForm = ({ employee, onClose }) => {
     }
   };
 
-  const InputField = ({ label, name, type = 'text', icon: Icon, error, ...props }) => (
-    <div className="form-control w-full">
-      <label className="label">
-        <span className="label-text">{label}</span>
-      </label>
-      <div className="relative">
-        {Icon && (
-          <span className="absolute left-3 top-3 text-base-content/50">
-            <Icon size={18} />
-          </span>
-        )}
-        <input
-          type={type}
-          className={`input input-bordered w-full ${Icon ? 'pl-10' : ''} ${error ? 'input-error' : ''}`}
-          {...register(name)}
-          {...props}
-        />
-      </div>
-      {error && <span className="text-error text-sm mt-1">{error.message}</span>}
-    </div>
-  );
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
           label="Name"
-          name="name"
           icon={MdPerson}
           error={errors.name}
           placeholder="Employee full name"
+          {...register('name')}
         />
         <InputField
           label="Email"
-          name="email"
           type="email"
           icon={MdEmail}
           error={errors.email}
           placeholder="employee@company.com"
+          {...register('email')}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
           label="Phone"
-          name="phone"
           type="tel"
           icon={MdPhone}
           placeholder="+1 (555) 000-0000"
+          {...register('phone')}
         />
         <InputField
           label="Address"
-          name="address"
           icon={MdLocationOn}
           placeholder="Full residential address"
+          {...register('address')}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
           label="Date of Birth"
-          name="dateOfBirth"
           type="date"
           icon={MdCalendarToday}
+          {...register('dateOfBirth')}
         />
         <InputField
           label="Join Date"
-          name="joinDate"
           type="date"
           icon={MdCalendarToday}
           error={errors.joinDate}
+          {...register('joinDate')}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
           label="Department"
-          name="department"
           icon={MdBusiness}
           error={errors.department}
           placeholder="Engineering"
+          {...register('department')}
         />
         <InputField
           label="Position"
-          name="position"
           icon={MdWork}
           error={errors.position}
           placeholder="Software Engineer"
+          {...register('position')}
         />
       </div>
 
       <InputField
         label="Salary"
-        name="salary"
         type="number"
         icon={MdAttachMoney}
         error={errors.salary}
         placeholder="60000"
+        {...register('salary')}
       />
 
       <div className="flex justify-end gap-2 pt-4">

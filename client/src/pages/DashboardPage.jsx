@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AppLayout } from '../layouts/AppShell';
+import { Page } from '../components/Page';
 import api from '../utils/api';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +11,8 @@ import {
   MdArrowForward
 } from 'react-icons/md';
 import clsx from 'clsx';
+import Loader from '../components/Loader';
+import MetricCard from '../components/MetricCard';
 
 const DashboardPage = () => {
   const { isAdmin, isHR, user } = useAuth();
@@ -108,9 +111,7 @@ const DashboardPage = () => {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex justify-center items-center h-64">
-          <span className="loading loading-spinner loading-lg text-primary"></span>
-        </div>
+        <Loader />
       </AppLayout>
     );
   }
@@ -146,38 +147,30 @@ const DashboardPage = () => {
     }
   };
 
+  const pageActions = (isAdmin || isHR) ? (
+    <>
+      <select
+        className="select select-bordered select-sm"
+        value={timeRange}
+        onChange={(e) => setTimeRange(e.target.value)}
+      >
+        <option value="7">Last 7 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="90">Last 90 days</option>
+      </select>
+      <button
+        className="btn btn-warning btn-sm"
+        onClick={() => navigate('/leaves')}
+      >
+        <MdNotifications size={16} className="mr-1" />
+        {pendingLeaves.length} Pending
+      </button>
+    </>
+  ) : null;
+
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto py-6">
-        {/* Header with controls */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">
-            {isAdmin ? 'Admin Dashboard' : isHR ? 'HR Dashboard' : 'Employee Dashboard'}
-          </h1>
-          <div className="flex gap-2">
-            {(isAdmin || isHR) && (
-              <>
-                <select
-                  className="select select-bordered select-sm"
-                  value={timeRange}
-                  onChange={(e) => setTimeRange(e.target.value)}
-                >
-                  <option value="7">Last 7 days</option>
-                  <option value="30">Last 30 days</option>
-                  <option value="90">Last 90 days</option>
-                </select>
-                <button
-                  className="btn btn-warning btn-sm"
-                  onClick={() => navigate('/leaves')}
-                >
-                  <MdNotifications size={16} className="mr-1" />
-                  {pendingLeaves.length} Pending
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
+      <Page title={isAdmin ? 'Admin Dashboard' : isHR ? 'HR Dashboard' : 'Employee Dashboard'} actions={pageActions}>
         {/* User Greeting */}
         <div className="card bg-primary/10 border border-primary/20 mb-6">
           <div className="card-body flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -236,112 +229,66 @@ const DashboardPage = () => {
         {/* Admin/HR Metrics - Company Wide */}
         {(isAdmin || isHR) && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-            <div className="card bg-base-100 shadow border border-base-300">
-              <div className="card-body p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-sm text-base-content/60">Total Employees</span>
-                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                    <MdPeople size={14} />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold">{metrics?.totalEmployees || 0}</p>
-                <p className="text-xs text-success">Active workforce</p>
-              </div>
-            </div>
-
-            <div className="card bg-base-100 shadow border border-base-300">
-              <div className="card-body p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-sm text-base-content/60">Attendance Rate</span>
-                  <div className="w-8 h-8 rounded-full bg-success/10 text-success flex items-center justify-center">
-                    <MdAccessTime size={14} />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold">{metrics?.attendanceRate || '0%'}</p>
-              </div>
-            </div>
-
-            <div className="card bg-base-100 shadow border border-base-300">
-              <div className="card-body p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-sm text-base-content/60">Pending Leaves</span>
-                  <div className="w-8 h-8 rounded-full bg-warning/10 text-warning flex items-center justify-center">
-                    <MdCalendarToday size={14} />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold">{metrics?.activeLeaves || 0}</p>
-                <p className="text-xs text-warning">Awaiting approval</p>
-              </div>
-            </div>
-
-            <div className="card bg-base-100 shadow border border-base-300">
-              <div className="card-body p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-sm text-base-content/60">Monthly Payroll</span>
-                  <div className="w-8 h-8 rounded-full bg-secondary/10 text-secondary flex items-center justify-center">
-                    <MdAttachMoney size={14} />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold">${payrollSummary?.totalNetPay?.toLocaleString() || '0'}</p>
-                <p className="text-xs text-base-content/60">{payrollSummary?.recordsCount || 0} employees</p>
-              </div>
-            </div>
-
-            <div className="card bg-base-100 shadow border border-base-300">
-              <div className="card-body p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-sm text-base-content/60">Days Recorded</span>
-                  <div className="w-8 h-8 rounded-full bg-info/10 text-info flex items-center justify-center">
-                    <MdBusiness size={14} />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold">{metrics?.totalAttendance || 0}</p>
-                <p className="text-xs text-base-content/60">This period</p>
-              </div>
-            </div>
+            <MetricCard
+              title="Total Employees"
+              value={metrics?.totalEmployees || 0}
+              description="Active workforce"
+              icon={MdPeople}
+              iconBgColor="bg-primary/10 text-primary"
+            />
+            <MetricCard
+              title="Attendance Rate"
+              value={metrics?.attendanceRate || '0%'}
+              icon={MdAccessTime}
+              iconBgColor="bg-success/10 text-success"
+            />
+            <MetricCard
+              title="Pending Leaves"
+              value={metrics?.activeLeaves || 0}
+              description="Awaiting approval"
+              icon={MdCalendarToday}
+              iconBgColor="bg-warning/10 text-warning"
+            />
+            <MetricCard
+              title="Monthly Payroll"
+              value={`$${payrollSummary?.totalNetPay?.toLocaleString() || '0'}`}
+              description={`${payrollSummary?.recordsCount || 0} employees`}
+              icon={MdAttachMoney}
+              iconBgColor="bg-secondary/10 text-secondary"
+            />
+            <MetricCard
+              title="Days Recorded"
+              value={metrics?.totalAttendance || 0}
+              description="This period"
+              icon={MdBusiness}
+              iconBgColor="bg-info/10 text-info"
+            />
           </div>
         )}
 
         {/* Employee Metrics - Personal Only */}
         {!isAdmin && !isHR && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-            <div className="card bg-base-100 shadow border border-base-300">
-              <div className="card-body p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-sm text-base-content/60">My Attendance Rate</span>
-                  <div className="w-8 h-8 rounded-full bg-success/10 text-success flex items-center justify-center">
-                    <MdAccessTime size={14} />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold">{metrics?.attendanceRate || '0%'}</p>
-              </div>
-            </div>
-
-            <div className="card bg-base-100 shadow border border-base-300">
-              <div className="card-body p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-sm text-base-content/60">My Leave Balance</span>
-                  <div className="w-8 h-8 rounded-full bg-warning/10 text-warning flex items-center justify-center">
-                    <MdCalendarToday size={14} />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold">{metrics?.activeLeaves || 0}</p>
-                <p className="text-xs text-base-content/60">Days pending/approved</p>
-              </div>
-            </div>
-
-            <div className="card bg-base-100 shadow border border-base-300">
-              <div className="card-body p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-sm text-base-content/60">My Net Pay</span>
-                  <div className="w-8 h-8 rounded-full bg-secondary/10 text-secondary flex items-center justify-center">
-                    <MdAttachMoney size={14} />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold">${payrollSummary?.totalNetPay?.toLocaleString() || '0'}</p>
-                <p className="text-xs text-base-content/60">This month</p>
-              </div>
-            </div>
+            <MetricCard
+              title="My Attendance Rate"
+              value={metrics?.attendanceRate || '0%'}
+              icon={MdAccessTime}
+              iconBgColor="bg-success/10 text-success"
+            />
+            <MetricCard
+              title="My Leave Balance"
+              value={metrics?.activeLeaves || 0}
+              description="Days pending/approved"
+              icon={MdCalendarToday}
+              iconBgColor="bg-warning/10 text-warning"
+            />
+            <MetricCard
+              title="My Net Pay"
+              value={`$${payrollSummary?.totalNetPay?.toLocaleString() || '0'}`}
+              description="This month"
+              icon={MdAttachMoney}
+              iconBgColor="bg-secondary/10 text-secondary"
+            />
           </div>
         )}
 
@@ -538,7 +485,7 @@ const DashboardPage = () => {
             </div>
           </>
         )}
-      </div>
+      </Page>
     </AppLayout>
   );
 };

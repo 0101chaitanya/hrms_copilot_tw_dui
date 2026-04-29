@@ -7,6 +7,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
 import { loginSuccess, loginFailure } from '../slices/authSlice';
 import { MdEmail, MdLock, MdPerson, MdBusiness } from 'react-icons/md';
+import InputField from '../components/InputField';
+import clsx from 'clsx'; // Import clsx
 
 const registerSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -55,28 +57,6 @@ const RegisterPage = () => {
     }
   };
 
-  const InputField = ({ label, name, type = 'text', icon: Icon, error, ...props }) => (
-    <div className="form-control w-full">
-      <label className="label">
-        <span className="label-text">{label}</span>
-      </label>
-      <div className="relative">
-        {Icon && (
-          <span className="absolute left-3 top-3 text-base-content/50">
-            <Icon size={18} />
-          </span>
-        )}
-        <input
-          type={type}
-          className={`input input-bordered w-full ${Icon ? 'pl-10' : ''} ${error ? 'input-error' : ''}`}
-          {...register(name)}
-          {...props}
-        />
-      </div>
-      {error && <span className="text-error text-sm mt-1">{error.message}</span>}
-    </div>
-  );
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
       <div className="w-full max-w-lg">
@@ -84,14 +64,14 @@ const RegisterPage = () => {
           SMART HRMS
         </h1>
 
-        <div className="card bg-base-100 shadow-xl">
+        <div className="card bg-base-100 shadow-xl border border-base-300">
           <div className="card-body">
             <h2 className="text-xl font-semibold text-center mb-6">
               Create your account
             </h2>
 
             {generalError && (
-              <div className="alert alert-error mb-4">
+              <div className="alert alert-error mb-4 shadow-sm">
                 <span>{generalError}</span>
               </div>
             )}
@@ -100,49 +80,49 @@ const RegisterPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField
                   label="First Name"
-                  name="firstName"
                   icon={MdPerson}
                   error={errors.firstName}
                   placeholder="John"
+                  {...register('firstName')}
                 />
                 <InputField
                   label="Last Name"
-                  name="lastName"
                   icon={MdPerson}
                   error={errors.lastName}
                   placeholder="Doe"
+                  {...register('lastName')}
                 />
               </div>
 
               <InputField
                 label="Company Name"
-                name="companyName"
                 icon={MdBusiness}
                 error={errors.companyName}
                 placeholder="Acme Corp"
+                {...register('companyName')}
               />
 
               <InputField
                 label="Email"
-                name="email"
                 type="email"
                 icon={MdEmail}
                 error={errors.email}
                 placeholder="your@email.com"
+                {...register('email')}
               />
 
               <InputField
                 label="Password"
-                name="password"
                 type="password"
                 icon={MdLock}
                 error={errors.password}
                 placeholder="Min 6 characters"
+                {...register('password')}
               />
 
               <button
                 type="submit"
-                className={`btn btn-primary w-full mt-4 ${isSubmitting ? 'loading' : ''}`}
+                className={clsx('btn btn-primary w-full mt-4', isSubmitting && 'loading')}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Registering...' : 'Register'}
@@ -151,7 +131,7 @@ const RegisterPage = () => {
 
             <p className="text-center text-sm text-base-content/60 mt-6">
               Already have an account?{' '}
-              <Link to="/login" className="link link-primary font-semibold">
+              <Link to="/login" className="link link-primary font-semibold hover:text-primary-focus transition-colors">
                 Login here
               </Link>
             </p>

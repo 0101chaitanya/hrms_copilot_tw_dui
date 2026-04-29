@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { AppLayout } from '../layouts/AppShell';
+import { Page } from '../components/Page';
 import api from '../utils/api';
 import EmployeeForm from '../components/EmployeeForm';
+import Loader from '../components/Loader';
+import clsx from 'clsx'; // Import clsx
 
 const EmployeesPage = () => {
   const [employees, setEmployees] = useState([]);
@@ -53,24 +56,21 @@ const EmployeesPage = () => {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex justify-center items-center h-64">
-          <span className="loading loading-spinner loading-lg text-primary"></span>
-        </div>
+        <Loader />
       </AppLayout>
     );
   }
 
+  const pageActions = (
+    <button className="btn btn-primary" onClick={handleAddEmployee}>
+      Add Employee
+    </button>
+  );
+
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Employees</h1>
-          <button className="btn btn-primary" onClick={handleAddEmployee}>
-            Add Employee
-          </button>
-        </div>
-
-        <div className="overflow-x-auto bg-base-100 rounded-lg shadow">
+      <Page title="Employees" actions={pageActions}>
+        <div className="overflow-x-auto bg-base-100 rounded-lg shadow border border-base-300">
           <table className="table table-zebra w-full">
             <thead>
               <tr className="bg-base-200">
@@ -83,37 +83,44 @@ const EmployeesPage = () => {
               </tr>
             </thead>
             <tbody>
-              {employees.map((employee) => (
-                <tr key={employee._id}>
-                  <td>{employee.name}</td>
-                  <td>{employee.email}</td>
-                  <td>{employee.department}</td>
-                  <td>{employee.position}</td>
-                  <td>${employee.salary.toLocaleString()}</td>
-                  <td>
-                    <div className="flex gap-2">
-                      <button
-                        className="btn btn-sm btn-ghost"
-                        onClick={() => handleEditEmployee(employee)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="btn btn-sm btn-error btn-outline"
-                        onClick={() => handleDeleteEmployee(employee._id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
+              {employees.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-4 text-base-content/50">
+                    No employee records found.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                employees.map((employee) => (
+                  <tr key={employee._id}>
+                    <td>{employee.firstName} {employee.lastName}</td>
+                    <td>{employee.email}</td>
+                    <td>{employee.department}</td>
+                    <td>{employee.position}</td>
+                    <td>${employee.salary?.toLocaleString()}</td>
+                    <td>
+                      <div className="flex gap-2">
+                        <button
+                          className="btn btn-xs btn-ghost"
+                          onClick={() => handleEditEmployee(employee)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-xs btn-error btn-outline"
+                          onClick={() => handleDeleteEmployee(employee._id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
 
-        {/* DaisyUI Modal */}
-        <dialog className={`modal ${opened ? 'modal-open' : ''}`}>
+        <dialog className={clsx('modal', opened && 'modal-open')}>
           <div className="modal-box max-w-2xl">
             <h3 className="font-bold text-lg mb-4">
               {selectedEmployee ? 'Edit Employee' : 'Add Employee'}
@@ -124,7 +131,7 @@ const EmployeesPage = () => {
             <button type="button">close</button>
           </form>
         </dialog>
-      </div>
+      </Page>
     </AppLayout>
   );
 };
